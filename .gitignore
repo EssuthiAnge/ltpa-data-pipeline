@@ -1,0 +1,14 @@
+# Environnement virtuel
+.venv/
+venv/
+
+# Fichiers systèmes
+__pycache__/
+*.pyc
+.DS_Store
+
+# Données générées (on ne les met pas sur Git car on peut les recréer)
+*.csv
+
+# Variables d'environnement
+.env
