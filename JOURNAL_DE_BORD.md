@@ -34,3 +34,38 @@ Création d'une simulation de pipeline ETL pour le site du LTPA de Yabassi. Les 
 ### 7. Vérification
 *   Connexion réussie via DBeaver sur la base `ltpa_simulation`.
 *   Vérification visuelle des 150 étudiants et 300 productions insérés avec succès.
+
+## Session 2 : Audit de la Qualité des Données (Data Quality)
+
+### 1. Problèmes identifiés sur la première version
+*   Incohérence temporelle : des productions étaient datées avant l'inscription des étudiants.
+*   Incohérence logique : des étudiants récemment inscrits avaient le statut "Diplômé".
+*   Incohérence de mesure : les animaux (lapins, moutons) étaient en décimales au lieu d'être en entiers (têtes).
+*   Reproductibilité : l'utilisation de dates dynamiques (today) rendait les données différentes à chaque exécution.
+
+## Session 3 : Refonte du Générateur et Modélisation DDL
+
+### 1. Améliorations apportées (Générateur)
+*   Refonte du script `generate_data.py` avec des dates fixes pour une reproductibilité totale.
+*   Ajout de "fenêtres d'activité" : un étudiant ne peut produire qu'entre son inscription et sa sortie.
+*   Gestion des unités : "Têtes" pour les animaux, "Kg" pour les récoltes.
+*   Ajout de contrôles d'intégrité (assertions) avant l'export CSV.
+*   Création d'une nouvelle table `interventions.csv` pour les activités de maintenance.
+
+### 2. Améliorations apportées (Pipeline ETL)
+*   Remplacement de `to_sql(if_exists='replace')` par l'exécution de requêtes **DDL** (Data Definition Language).
+*   Création explicite des tables avec les bons types (`DATE`, `NUMERIC`) et les contraintes (`PRIMARY KEY`, `FOREIGN KEY`).
+*   Utilisation d'une transaction (`engine.begin()`) : si une erreur survient, aucune donnée n'est insérée (principe du "tout ou rien").
+
+### 3. Vérification visuelle et Preuves
+*   Validation dans DBeaver : les colonnes de dates sont bien typées (icône calendrier) et les relations sont établies.
+*   Captures d'écran ajoutées au dossier `images/` :
+
+**Table etudiants :**
+![Aperçu des étudiants](images/etudiant.png)
+
+**Table productions :**
+![Aperçu des productions](images/production.png)
+
+**Table interventions :**
+![Aperçu des interventions](images/intervention.png)
