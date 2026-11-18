@@ -69,3 +69,65 @@ Création d'une simulation de pipeline ETL pour le site du LTPA de Yabassi. Les 
 
 **Table interventions :**
 ![Aperçu des interventions](images/intervention.png)
+
+
+## Session 4 : Visualisation avec Power BI Service
+
+### 1. Objectif
+Construire un tableau de bord Power BI à partir des trois tables du projet (`etudiants`, `productions`, `interventions`), depuis un poste Linux et sans machine virtuelle.
+
+### 2. Contraintes identifiées
+*   Power BI Service (version web) ne peut pas lire directement la base PostgreSQL qui tourne dans Docker sur le poste local : l'accès passerait par une passerelle de données, qui ne s'installe que sous Windows.
+*   Contournement retenu : exporter les données dans un fichier Excel, que Power BI lit depuis OneDrive.
+*   Les données étant déjà générées, les CSV de la session 3 servent de source (ils sont identiques au contenu des tables PostgreSQL).
+
+### 3. Préparation du fichier Excel
+*   Installation de `openpyxl` dans le `venv` ; mise à jour de `requirements.txt` avec `pip freeze > requirements.txt`.
+*   Création du script `to_excel.py` qui regroupe les trois CSV dans un seul fichier `ltpa_donnees.xlsx` (un onglet par table).
+*   Choix techniques :
+    *   `parse_dates` à la lecture des CSV, pour que les dates soient de vraies dates et non du texte ;
+    *   chaque onglet est mis en forme de **tableau Excel** nommé (`etudiants`, `productions`, `interventions`), ce qui facilite la détection par Power BI ;
+    *   affichage des dates au format `AAAA-MM-JJ`.
+*   Vérification du fichier dans un tableur en ligne : trois onglets, tableaux filtrables, dates alignées à droite (donc reconnues comme dates), `Date_Fin` vide pour les étudiants actifs.
+
+### 4. Import dans Power BI Service
+*   Tentative d'import local (Importer > Rapport ou Classeur > Depuis cet ordinateur) : **refusée** par Power BI, qui n'accepte plus l'envoi de fichiers Excel depuis un dossier local.
+*   Solution : téléversement de `ltpa_donnees.xlsx` dans le **OneDrive** du compte scolaire, à la racine de « My files ».
+*   L'import via « Workbook » crée seulement un classeur consultable, pas un modèle de données. Le bon chemin est : **Create > Excel > Link to file > Browse OneDrive**.
+*   Dans Power Query : sélection des trois éléments `etudiants`, `interventions` et `productions` (les versions sans chiffre ; les tableaux `etudiants1`, `interventions3`, `productions2` donnent le même contenu). Types détectés correctement (texte, nombre décimal, date).
+*   Création du **modèle sémantique seul** (« Create a semantic model only ») nommé `LTPA_modele`.
+
+### 5. Modélisation des relations
+*   Relation `interventions[ID_Etudiant]` → `etudiants[ID_Etudiant]` détectée automatiquement par Power BI (même nom de colonne).
+*   Relation `productions[ID_Etudiant_Responsable]` → `etudiants[ID_Etudiant]` créée manuellement (noms de colonnes différents, donc non détectée).
+*   Réglages des deux relations : cardinalité **plusieurs à un (\*:1)**, filtre croisé **Single**, relations **actives**.
+*   Résultat : un schéma en étoile, avec `etudiants` au centre et les deux tables d'activité autour.
+
+### 6. Rapport `LTPA_dashboard`
+*   Carte « Count of ID_Etudiant » : affiche **150**, ce qui confirme que le modèle lit bien tous les étudiants.
+*   Graphique en barres « étudiants par département » (quatre barres dont le total fait 150).
+*   Le filtrage croisé fonctionne : un clic sur une barre filtre la carte, et inversement.
+*   Rapport enregistré dans « My workspace ».
+
+### 7. Problèmes rencontrés & Solutions
+*   **Problème :** la fenêtre de sélection de fichier du navigateur semblait vide.
+    **Solution :** le filtre « All Supported Types » masquait les fichiers ; le passer sur « All files » les affiche.
+*   **Problème :** « Power BI no longer supports the upload of Excel files from local folders ».
+    **Solution :** passer par OneDrive.
+*   **Problème :** l'élément `ltpa_donnees` de type *Workbook* ne permettait pas de créer de relations.
+    **Solution :** créer un *Semantic model* depuis la page Create > Excel.
+*   **Problème :** la relation entre `productions` et `etudiants` n'existait pas.
+    **Solution :** création manuelle dans Manage relationships.
+*   **Point d'attention :** l'aperçu Power Query affiche les dates au format américain (`2/21/2026` = 21 février 2026) ; les valeurs sont correctes.
+
+### 8. À savoir
+*   Le fichier Excel dans OneDrive est une **copie figée** des données : si les CSV sont régénérés, il faut renvoyer le fichier dans OneDrive puis actualiser le modèle.
+*   Le modèle sémantique et le rapport sont stockés dans Power BI Service ; Docker n'est pas nécessaire pour les consulter.
+
+### 9. Prochaines étapes
+*   Graphique des productions par option, groupé par unité (ne jamais additionner des kg et des têtes).
+*   Graphique des interventions par équipement et par type.
+*   Répartition des étudiants par statut.
+*   Segments (filtres) par département et par option.
+*   Capture d'écran du tableau de bord dans `images/` pour le `README.md`.
+*   Vérifier si le compte scolaire permet le partage du rapport (bouton *Share*) ; sinon, export PDF.
