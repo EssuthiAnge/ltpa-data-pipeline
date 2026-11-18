@@ -37,3 +37,6 @@ L'objectif est de concevoir un pipeline ETL complet pour traiter les données d'
 
 **Table `interventions` :**
 ![Aperçu des interventions](images/intervention.png)
+
+**Dashboard Final Power BI :**
+![Dashboard Power BI](images/pbi_30_dashboard_final.png)

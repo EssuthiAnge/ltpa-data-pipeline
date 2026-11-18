@@ -131,3 +131,64 @@ Construire un tableau de bord Power BI à partir des trois tables du projet (`et
 *   Segments (filtres) par département et par option.
 *   Capture d'écran du tableau de bord dans `images/` pour le `README.md`.
 *   Vérifier si le compte scolaire permet le partage du rapport (bouton *Share*) ; sinon, export PDF.
+
+## Session 5 : Création du Dashboard Power BI
+
+### 1. Contexte et Contraintes
+*   Power BI Desktop n'étant pas disponible nativement sur Linux, l'outil **Power BI Service** (version web) a été utilisé via le compte étudiant.
+*   La connexion directe à PostgreSQL (Docker) étant bloquée par la passerelle web, les données ont été consolidées dans un fichier Excel (`ltpa_donnees.xlsx`) déposé sur OneDrive.
+
+### 2. Importation des données
+*   Découverte de l'interface Power BI et tentative d'importation locale.
+*   Résolution des problèmes de filtre de fichiers et contournement du blocage d'importation locale via OneDrive.
+
+**Preuves visuelles - Importation :**
+![PBI 01](images/pbi_01_accueil.png)
+![PBI 02](images/pbi_02_menu_import.png)
+![PBI 03](images/pbi_03_source_locale.png)
+![PBI 04](images/pbi_04_bug_filtre.png)
+![PBI 05](images/pbi_05_solution_filtre.png)
+![PBI 06](images/pbi_06_erreur_locale.png)
+![PBI 07](images/pbi_07_onedrive_upload.png)
+![PBI 08](images/pbi_08_import_reussi.png)
+![PBI 09](images/pbi_09_creation_modele.png)
+![PBI 10](images/pbi_10_creation_rapport.png)
+![PBI 11](images/pbi_11_connexion_onedrive.png)
+![PBI 12](images/pbi_12_url_onedrive.png)
+
+### 3. Transformation (Power Query)
+*   Sélection des tables pertinentes pour éviter les doublons.
+*   Vérification du typage des données (notamment les dates) et des étapes appliquées.
+
+**Preuves visuelles - Power Query :**
+![PBI 13](images/pbi_13_selection_tables.png)
+![PBI 14](images/pbi_14_apercu_donnees.png)
+![PBI 15](images/pbi_15_power_query_etapes.png)
+
+### 4. Modélisation (Schéma en étoile)
+*   Création du modèle sémantique `LTPA_modele`.
+*   Création des relations 1-à-plusieurs (*:1) entre la table de faits (`etudiants`) et les tables de dimensions (`productions`, `interventions`).
+
+**Preuves visuelles - Modélisation :**
+![PBI 16](images/pbi_16_creation_modele_seul.png)
+![PBI 17](images/pbi_17_nom_modele.png)
+![PBI 18](images/pbi_18_schema_etoile.png)
+![PBI 19](images/pbi_19_relations_powerbi.png)
+![PBI 20](images/pbi_20_creation_relation_manuelle.png)
+![PBI 21](images/pbi_21_relations_validees.png)
+![PBI 22](images/pbi_22_schema_etoile.png)
+
+### 5. Création des visuels et Dashboard
+*   Création du rapport `LTPA_dashboard`.
+*   Ajout de cartes KPI (ex: 150 étudiants) pour valider la connexion.
+*   Ajout d'un graphique en barres pour la répartition des effectifs par département.
+
+**Preuves visuelles - Visualisation :**
+![PBI 23](images/pbi_23_page_blanche.png)
+![PBI 24](images/pbi_24_choix_visuel_carte.png)
+![PBI 25](images/pbi_25_selection_donnee.png)
+![PBI 26](images/pbi_26_visuel_vide.png)
+![PBI 27](images/pbi_27_kpi_150.png)
+![PBI 28](images/pbi_28_sauvegarde_rapport.png)
+![PBI 29](images/pbi_29_rapport_sauvegarde.png)
+![PBI 30](images/pbi_30_dashboard_final.png)
